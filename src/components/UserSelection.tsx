@@ -156,12 +156,12 @@ const UserSelection: React.FC = () => {
         </div>
 
         {/* Bottom hint */}
-        <div className="text-center mt-6">
+        {/* <div className="text-center mt-6">
           <p className="text-white/50 text-xs font-medium">
             Secure access • End-to-end encrypted
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
