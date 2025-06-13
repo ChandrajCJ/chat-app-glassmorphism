@@ -83,10 +83,10 @@ const UserSelection: React.FC = () => {
               
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-white/95 mb-2 text-shadow">
-                  Welcome Back
+                  Welcome Back Beautify
                 </h1>
                 <p className="text-white/70 text-sm font-medium">
-                  Enter your PIN to continue
+                  Enter Your PIN
                 </p>
               </div>
             </div>
