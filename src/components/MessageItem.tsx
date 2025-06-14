@@ -34,6 +34,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const isOwnMessage = message.sender === currentUser;
   const messageRef = useRef<HTMLDivElement>(null);
+  const messageBubbleRef = useRef<HTMLDivElement>(null);
 
   const handleEdit = () => {
     if (editText.trim() && editText !== message.text) {
@@ -142,15 +143,53 @@ const MessageItem: React.FC<MessageItemProps> = ({
           relative max-w-[85%] sm:max-w-[75%] transition-all duration-300 hover:scale-[1.02]
           ${isOwnMessage ? 'ml-auto' : 'mr-auto'}
         `}>
+          {/* Reactions picker - Positioned above message bubble */}
+          {showReactions && (
+            <div className={`
+              absolute bottom-full mb-2 z-[100]
+              glass-dark rounded-2xl shadow-2xl p-3 border border-white/10
+              animate-fade-in
+              ${isOwnMessage ? 'right-0' : 'left-0'}
+            `}>
+              <div className="flex gap-2 flex-wrap">
+                {REACTIONS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => handleReaction(emoji)}
+                    className={`
+                      w-10 h-10 rounded-xl flex items-center justify-center text-lg
+                      transition-all duration-200 hover:scale-125 active:scale-110
+                      ${message.reaction === emoji 
+                        ? 'bg-white/20 scale-110' 
+                        : 'hover:bg-white/10'
+                      }
+                    `}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+              {/* Arrow pointing down to message */}
+              <div className={`
+                absolute top-full w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px]
+                border-l-transparent border-r-transparent border-t-white/10
+                ${isOwnMessage ? 'right-4' : 'left-4'}
+              `}></div>
+            </div>
+          )}
+
           {/* Message bubble */}
-          <div className={`
-            glass-message rounded-3xl px-4 py-3 shadow-lg relative
-            ${isOwnMessage 
-              ? 'rounded-tr-lg bg-gradient-to-br from-purple-500/20 to-violet-600/20 border-purple-400/20' 
-              : 'rounded-tl-lg bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-400/20'
-            }
-            ${message.reaction ? 'mb-2' : ''}
-          `}>
+          <div 
+            ref={messageBubbleRef}
+            className={`
+              glass-message rounded-3xl px-4 py-3 shadow-lg relative
+              ${isOwnMessage 
+                ? 'rounded-tr-lg bg-gradient-to-br from-purple-500/20 to-violet-600/20 border-purple-400/20' 
+                : 'rounded-tl-lg bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-400/20'
+              }
+              ${message.reaction ? 'mb-2' : ''}
+            `}
+          >
             {/* Reply indicator */}
             {message.replyTo && (
               <div 
@@ -287,27 +326,21 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
           {/* Reaction */}
           {message.reaction && (
-            <div className="flex justify-end mt-1">
+            <div className={`flex mt-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
               <div className="glass-dark rounded-full px-3 py-1 border border-white/10">
                 <span className="text-lg">{message.reaction}</span>
               </div>
             </div>
           )}
 
-          {/* Menu dropdown - Fixed positioning and z-index */}
+          {/* Menu dropdown - Positioned relative to message */}
           {showMenu && (
             <div className={`
-              fixed z-[100] mt-2 min-w-[140px]
+              absolute top-full mt-2 z-[100] min-w-[140px]
               glass-dark rounded-2xl shadow-2xl py-2 border border-white/10
               animate-fade-in
-            `}
-            style={{
-              top: messageRef.current ? 
-                messageRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
-              left: isOwnMessage ? 
-                (messageRef.current ? messageRef.current.getBoundingClientRect().right - 140 : 0) :
-                (messageRef.current ? messageRef.current.getBoundingClientRect().left : 0)
-            }}>
+              ${isOwnMessage ? 'right-0' : 'left-0'}
+            `}>
               <button
                 onClick={startEditing}
                 className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm text-white/80 hover:text-white hover:bg-white/5 transition-colors"
@@ -322,41 +355,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
                 <Trash2 size={16} />
                 Delete
               </button>
-            </div>
-          )}
-
-          {/* Reactions picker - Fixed positioning and z-index */}
-          {showReactions && (
-            <div className={`
-              fixed z-[100] mt-2
-              glass-dark rounded-2xl shadow-2xl p-3 border border-white/10
-              animate-fade-in
-            `}
-            style={{
-              top: messageRef.current ? 
-                messageRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
-              left: isOwnMessage ? 
-                (messageRef.current ? messageRef.current.getBoundingClientRect().right - 200 : 0) :
-                (messageRef.current ? messageRef.current.getBoundingClientRect().left : 0)
-            }}>
-              <div className="flex gap-2">
-                {REACTIONS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => handleReaction(emoji)}
-                    className={`
-                      w-10 h-10 rounded-xl flex items-center justify-center text-lg
-                      transition-all duration-200 hover:scale-125
-                      ${message.reaction === emoji 
-                        ? 'bg-white/20 scale-110' 
-                        : 'hover:bg-white/10'
-                      }
-                    `}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
             </div>
           )}
         </div>
